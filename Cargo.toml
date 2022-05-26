@@ -1,7 +1,7 @@
 [package]
-name = "rust-api-template"
+name = "kraken-exporter"
 version = "0.0.1"
-description = "Rust API Template"
+description = "Exporter for the Kraken Exchange"
 edition = "2021"
 
 [dependencies]
