@@ -1,6 +1,6 @@
 [package]
 name = "kraken-exporter"
-version = "0.0.6"
+version = "0.0.7"
 description = "Exporter for the Kraken Exchange"
 edition = "2021"
 

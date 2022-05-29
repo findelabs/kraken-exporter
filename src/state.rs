@@ -14,7 +14,7 @@ type BoxResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 const ASSET_PAIRS: &str = "https://api.kraken.com/0/public/AssetPairs";
 const ASSETS: &str = "https://api.kraken.com/0/public/Assets";
 const TICKER: &str = "https://api.kraken.com/0/public/Ticker";
-const REFERENCE_CURRENCIES: &'static [&'static str] = &["AUD", "BTC", "ETH", "EUR", "GBP", "USD", "XBT", "USDT", "USDC"];
+const REFERENCE_CURRENCIES: &'static [&'static str] = &["AUD", "CAD", "BTC", "ETH", "EUR", "GBP", "JPY", "USD", "XBT", "USDT", "USDC"];
 
 #[derive(Clone, Debug)]
 pub struct State {
