@@ -154,11 +154,12 @@ impl State {
 
         for (asset, value) in tickers.result.iter() {
             let asset_pair = &asset_pairs.result.get(asset).unwrap();
-            let mut reference_currency = asset_pair.quote.to_string();
-            reference_currency.remove(0);
+//            let wsname = asset_pair.wsname.to_string();
+            let wsname_split: Vec<&str> = asset_pair.wsname.split('/').collect();
+
             let labels = [
-                ("currency", asset_pair.base.to_string()),
-                ("reference_currency", reference_currency.to_string()),
+                ("currency", wsname_split[0].to_string()),
+                ("reference_currency", wsname_split[1].to_string()),
                 ("pair", asset_pair.wsname.to_string())
             ];
             gauge!("exchange_rate", value.c[0].parse::<f64>().unwrap(), &labels);
