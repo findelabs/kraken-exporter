@@ -163,12 +163,10 @@ impl State {
                 ("pair", asset_pair.wsname.to_string())
             ];
             gauge!("exchange_rate", value.c[0].parse::<f64>().unwrap(), &labels);
-            gauge!("exchange_volume", value.v[0].parse::<f64>().unwrap(), &labels);
-            gauge!("exchange_volume_last_day", value.v[1].parse::<f64>().unwrap(), &labels);
+            gauge!("exchange_volume_daily", value.v[1].parse::<f64>().unwrap(), &labels);
             gauge!("exchange_rate_average", value.p[0].parse::<f64>().unwrap(), &labels);
             gauge!("exchange_rate_average_last_day", value.p[1].parse::<f64>().unwrap(), &labels);
-            gauge!("exchange_trades", value.t[0] as f64, &labels);
-            gauge!("exchange_trades_last_day", value.t[1] as f64, &labels);
+            gauge!("exchange_trades_daily", value.t[1] as f64, &labels);
         }
 
         Ok(())
