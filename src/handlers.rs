@@ -39,21 +39,6 @@ pub async fn metrics(
     Ok(recorder_handle.render())
 }
 
-pub async fn help() -> Json<Value> {
-    log::info!("{{\"fn\": \"help\", \"method\":\"get\"}}");
-    let payload = json!({"paths": {
-            "/health": "Get the health of the api",
-            "/config": "Get config of api",
-            "/reload": "Reload the api's config",
-            "/echo": "Echo back json payload (debugging)",
-            "/help": "Show this help message",
-            "/:endpoint": "Show config for specific endpoint",
-            "/:endpoint/*path": "Pass through any request to specified endpoint"
-        }
-    });
-    Json(payload)
-}
-
 pub async fn handler_404(OriginalUri(original_uri): OriginalUri) -> impl IntoResponse {
     let parts = original_uri.into_parts();
     let path_and_query = parts.path_and_query.expect("Missing post path and query");

@@ -12,7 +12,9 @@ use crate::error::Error as RestError;
 type BoxResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
 const ASSET_PAIRS: &str = "https://api.kraken.com/0/public/AssetPairs";
+const ASSETS: &str = "https://api.kraken.com/0/public/Assets";
 const TICKER: &str = "https://api.kraken.com/0/public/Ticker";
+const REFERENCE_CURRENCIES: &'static [&'static str] = &["AUD", "BTC", "ETH", "EUR", "GBP", "USD", "XBT", "USDT", "USDC"];
 
 #[derive(Clone, Debug)]
 pub struct State {
@@ -20,13 +22,27 @@ pub struct State {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct AssetPairs {
+pub struct Assets {
   error: Vec<String>,
   result: HashMap<String, Asset>
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Asset {
+  aclass: String,
+  altname: String,
+  decimals: u32,
+  display_decimals: u32 
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct AssetPairs {
+  error: Vec<String>,
+  result: HashMap<String, AssetPair>
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct AssetPair {
   wsname: String,
   base: String,
   quote: String
@@ -67,7 +83,7 @@ impl State {
 
     pub async fn get(&self, url: &str) -> Result<Bytes, RestError> {
 
-        let mut req = Request::builder()
+        let req = Request::builder()
             .method("GET")
             .uri(url)
             .body(Body::empty())
@@ -92,20 +108,43 @@ impl State {
         }
     }
 
-//  c: Vec<String>,
-//  v: Vec<String>,
-//  p: Vec<String>,
-//  t: Vec<u32>
-
     pub async fn generate(&self) -> Result<(), RestError> {
         let bytes = self.get(ASSET_PAIRS).await?;
         let asset_pairs: AssetPairs = serde_json::from_slice(&bytes)?;
-
         log::debug!("{:?}", asset_pairs);
 
-        let assets: Vec<String> = asset_pairs.result.iter().map(|(k,_)| k.to_string()).collect();
-        let assets_query = assets.join(",");
+        let bytes = self.get(ASSETS).await?;
+        let assets: Assets = serde_json::from_slice(&bytes)?;
+        log::debug!("{:?}", assets);
 
+        let mut vec: Vec<String> = Vec::new();
+        for (_, asset) in assets.result.iter() {
+            log::debug!("Looping over {}", asset.altname);
+            for reference_currency in REFERENCE_CURRENCIES {
+                let pair = format!("{}{}", asset.altname, reference_currency);
+                log::trace!("Checking if {} exists", pair);
+                if asset_pairs.result.contains_key(&pair) {
+                    log::debug!("{} pair exists", pair);
+                    vec.push(pair);
+                }
+
+                let pair = format!("X{}X{}", asset.altname, reference_currency);
+                log::trace!("Checking if {} exists", pair);
+                if asset_pairs.result.contains_key(&pair) {
+                    log::debug!("{} pair exists", pair);
+                    vec.push(pair);
+                }
+
+                let pair = format!("X{}Z{}", asset.altname, reference_currency);
+                log::trace!("Checking if {} exists", pair);
+                if asset_pairs.result.contains_key(&pair) {
+                    log::debug!("{} pair exists", pair);
+                    vec.push(pair);
+                }
+            }
+        }
+
+        let assets_query = vec.join(",");
         log::debug!("{:#?}", assets_query);
 
         let url = format!("{}?pair={}", TICKER, assets_query);
